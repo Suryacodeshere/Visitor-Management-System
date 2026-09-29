@@ -15,17 +15,17 @@ const Login = ({ setToken, setUser }) => {
     try {
       const res = await axios.post(API_URL, { username, password });
       const { token, username: userObj, role } = res.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('username', userObj);
       localStorage.setItem('role', role);
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       setToken(token);
       if (setUser) setUser({ username: userObj, role });
-      
-      navigate('/');
+
+      navigate('/admin');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
     }
@@ -34,22 +34,22 @@ const Login = ({ setToken, setUser }) => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-6 text-center">Visitor System Login</h2>
-        {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Admin Portal Login</h2>
+        {error && <p className="text-red-500 mb-4 text-sm text-center">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label className="block mb-1 text-sm font-medium">Username</label>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Username</label>
             <input
               type="text"
               className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              placeholder="e.g. admin or receptionist"
+              placeholder="e.g. admin"
               required
             />
           </div>
           <div className="mb-6">
-            <label className="block mb-1 text-sm font-medium">Password</label>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Password</label>
             <input
               type="password"
               className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -59,8 +59,8 @@ const Login = ({ setToken, setUser }) => {
               required
             />
           </div>
-          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
-            Login
+          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition font-medium">
+            Login to Admin Dashboard
           </button>
         </form>
       </div>
