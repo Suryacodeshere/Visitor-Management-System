@@ -4,7 +4,7 @@ import axios from 'axios';
 import { CSVLink } from 'react-csv';
 import { Search, Download, Edit2, Trash2 } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/visitors';
+const API_URL = `${import.meta.env.VITE_API_URL}/visitors`;
 
 const VisitorList = ({ refreshStats }) => {
   const [visitors, setVisitors] = useState([]);

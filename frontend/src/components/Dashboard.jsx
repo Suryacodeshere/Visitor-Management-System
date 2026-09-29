@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Users } from 'lucide-react';
 import VisitorList from './VisitorList';
 
-const API_URL = 'http://localhost:5000/api/visitors';
+const API_URL = `${import.meta.env.VITE_API_URL}/visitors`;
 
 const Dashboard = () => {
   const [todayCount, setTodayCount] = useState(0);
