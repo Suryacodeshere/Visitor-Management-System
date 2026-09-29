@@ -5,7 +5,7 @@ import VisitorList from './VisitorList';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/visitors`;
 
-const Dashboard = () => {
+const Dashboard = ({ user }) => {
   const [todayCount, setTodayCount] = useState(0);
 
   useEffect(() => {
@@ -23,7 +23,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white rounded-lg shadow p-6 flex items-center">
           <div className="p-3 rounded-full bg-blue-100 text-blue-600">
@@ -36,8 +35,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-
-      <VisitorList refreshStats={fetchTodayStats} />
+      <VisitorList refreshStats={fetchTodayStats} user={user} />
     </div>
   );
 };

@@ -37,13 +37,26 @@ mongoose.connect(MONGO_URI)
   .then(async () => {
     const User = require('./models/User');
     const bcrypt = require('bcryptjs');
-    const userExists = await User.findOne({ username: 'admin' });
-    if (!userExists) {
+
+    // Seed/update admin user
+    let adminUser = await User.findOne({ username: 'admin' });
+    if (!adminUser) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('admin123', salt);
-      await User.create({ username: 'admin', password: hashedPassword });
-      console.log('Default admin user created');
+      await User.create({ username: 'admin', password: hashedPassword, role: 'admin' });
+    } else if (adminUser.role !== 'admin') {
+      adminUser.role = 'admin';
+      await adminUser.save();
     }
+
+    // Seed default receptionist user
+    let receptionistUser = await User.findOne({ username: 'receptionist' });
+    if (!receptionistUser) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('reception123', salt);
+      await User.create({ username: 'receptionist', password: hashedPassword, role: 'receptionist' });
+    }
+
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch((err) => console.error(err));

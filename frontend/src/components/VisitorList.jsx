@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { CSVLink } from 'react-csv';
@@ -6,12 +6,13 @@ import { Search, Download, Edit2, Trash2 } from 'lucide-react';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/visitors`;
 
-const VisitorList = ({ refreshStats }) => {
+const VisitorList = ({ refreshStats, user }) => {
   const [visitors, setVisitors] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  // Bug fix: debounce search input — wait 400ms after typing stops
+  const isAdmin = (user?.role || localStorage.getItem('role')) === 'admin';
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -33,13 +34,18 @@ const VisitorList = ({ refreshStats }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!isAdmin) {
+      alert('Permission denied: Only Admins can delete visitor records.');
+      return;
+    }
+
     if (window.confirm('Are you sure you want to delete this record?')) {
       try {
         await axios.delete(`${API_URL}/${id}`);
         fetchVisitors();
         if (refreshStats) refreshStats();
       } catch (error) {
-        console.error('Error deleting visitor:', error);
+        alert(error.response?.data?.error || 'Error deleting visitor');
       }
     }
   };
@@ -108,12 +114,14 @@ const VisitorList = ({ refreshStats }) => {
                   {new Date(v.entryTime).toLocaleString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <Link to={`/edit-visitor/${v._id}`} className="text-indigo-600 hover:text-indigo-900 mr-4 inline-block">
+                  <Link to={`/edit-visitor/${v._id}`} className="text-indigo-600 hover:text-indigo-900 mr-4 inline-block" title="Edit Visitor">
                     <Edit2 size={18} />
                   </Link>
-                  <button onClick={() => handleDelete(v._id)} className="text-red-600 hover:text-red-900 inline-block">
-                    <Trash2 size={18} />
-                  </button>
+                  {isAdmin && (
+                    <button onClick={() => handleDelete(v._id)} className="text-red-600 hover:text-red-900 inline-block" title="Delete Visitor (Admin Only)">
+                      <Trash2 size={18} />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

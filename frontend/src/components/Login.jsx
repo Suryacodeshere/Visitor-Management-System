@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/auth/login`;
 
-const Login = ({ setToken }) => {
+const Login = ({ setToken, setUser }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,10 +14,17 @@ const Login = ({ setToken }) => {
     e.preventDefault();
     try {
       const res = await axios.post(API_URL, { username, password });
-      const token = res.data.token;
+      const { token, username: userObj, role } = res.data;
+      
       localStorage.setItem('token', token);
+      localStorage.setItem('username', userObj);
+      localStorage.setItem('role', role);
+
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
       setToken(token);
+      if (setUser) setUser({ username: userObj, role });
+      
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
@@ -27,7 +34,7 @@ const Login = ({ setToken }) => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Visitor System Login</h2>
         {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
@@ -37,6 +44,7 @@ const Login = ({ setToken }) => {
               className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={username}
               onChange={e => setUsername(e.target.value)}
+              placeholder="e.g. admin or receptionist"
               required
             />
           </div>
@@ -47,6 +55,7 @@ const Login = ({ setToken }) => {
               className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={password}
               onChange={e => setPassword(e.target.value)}
+              placeholder="Enter password"
               required
             />
           </div>
