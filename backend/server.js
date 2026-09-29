@@ -43,7 +43,8 @@ mongoose.connect(MONGO_URI)
     if (!adminUser) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('admin123', salt);
-      await User.create({ username: 'admin', password: hashedPassword, role: 'admin' });
+      await User.create({ username: 'admin', password: hashedPassword, role: 'admin' });.
+      
     }
 
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

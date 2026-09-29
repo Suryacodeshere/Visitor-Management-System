@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { UserCheck, CheckCircle, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { UserCheck, Clock, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/visitors`;
 
@@ -58,11 +57,18 @@ const SelfCheckIn = () => {
   if (submitted && lastRegistered) {
     return (
       <div className="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center my-8">
-        <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle size={36} />
+        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Clock size={36} />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Check-in Successful!</h2>
-        <p className="text-gray-600 mb-6">Welcome! Your visit has been registered in the system.</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Check-in Request Submitted!</h2>
+        <p className="text-gray-600 mb-6 text-sm">
+          Your visit request has been logged and is currently <span className="font-semibold text-amber-600">Pending Approval</span> by the admin/host.
+        </p>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 inline-flex items-center space-x-2 text-amber-800 text-sm font-semibold">
+          <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping"></span>
+          <span>Status: PENDING APPROVAL</span>
+        </div>
 
         <div className="bg-gray-50 p-4 rounded-lg text-left text-sm space-y-2 mb-6 border">
           <div className="flex justify-between">
@@ -74,8 +80,12 @@ const SelfCheckIn = () => {
             <span className="text-gray-800">{lastRegistered.mobile}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500 font-medium">Meeting Person:</span>
+            <span className="text-gray-500 font-medium">Host / Meeting Person:</span>
             <span className="font-semibold text-indigo-600">{lastRegistered.personToMeet}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500 font-medium">Purpose:</span>
+            <span className="text-gray-800">{lastRegistered.purpose}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500 font-medium">Check-in Time:</span>

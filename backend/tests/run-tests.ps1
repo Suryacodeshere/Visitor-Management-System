@@ -68,8 +68,9 @@ try {
     $body = @{ name="Alice Smith"; mobile="9876543211"; companyName="Acme Corp"; personToMeet="Bob Johnson"; purpose="Project Meeting" } | ConvertTo-Json
     $res = Invoke-RestMethod -Uri "$baseUrl/visitors" -Method POST -Body $body -ContentType "application/json"
     $createdVisitorId = $res._id
-    Report-Test 6 "Create visitor with complete valid fields" ($null -ne $createdVisitorId) "Created ID: $createdVisitorId"
-} catch { Report-Test 6 "Create visitor with complete valid fields" $false $_.Exception.Message }
+    $isPending = $res.status -eq "Pending"
+    Report-Test 6 "Create visitor with valid fields & status 'Pending'" ($isPending -and ($null -ne $createdVisitorId)) "Created ID: $createdVisitorId, Status: $($res.status)"
+} catch { Report-Test 6 "Create visitor with valid fields & status 'Pending'" $false $_.Exception.Message }
 
 try {
     $body = @{ mobile="9876543212"; personToMeet="Bob Johnson"; purpose="Meeting" } | ConvertTo-Json
@@ -119,13 +120,13 @@ try {
 
 try {
     $stats = Invoke-RestMethod -Uri "$baseUrl/visitors/stats/today" -Method GET -Headers $authHeaders
-    Report-Test 14 "Fetch today's visitor count stats" ($stats.count -ge 1) "Today count: $($stats.count)"
-} catch { Report-Test 14 "Fetch today's visitor count stats" $false $_.Exception.Message }
+    Report-Test 14 "Fetch today's visitor count & status breakdown stats" ($null -ne $stats.pending) "Total: $($stats.count), Pending: $($stats.pending)"
+} catch { Report-Test 14 "Fetch today's visitor count & status breakdown stats" $false $_.Exception.Message }
 
 # ---------------------------------------------------------
-# CATEGORY 4: Single Record Lookup & Update (TC15 - TC17)
+# CATEGORY 4: Approval Workflow & Status Updates (TC15 - TC17)
 # ---------------------------------------------------------
-Write-Host "`n--- CATEGORY 4: Single Record Lookup & Update ---" -ForegroundColor DarkCyan
+Write-Host "`n--- CATEGORY 4: Approval Workflow & Status Updates ---" -ForegroundColor DarkCyan
 
 try {
     $item = Invoke-RestMethod -Uri "$baseUrl/visitors/$createdVisitorId" -Method GET -Headers $authHeaders
@@ -139,10 +140,10 @@ try {
 } catch { Report-Test 16 "Fetch visitor by non-existent ID (expects 404)" $true "Returned 404 as expected" }
 
 try {
-    $updateBody = @{ name="Alice Smith Updated"; mobile="9876543211"; companyName="Acme Global"; personToMeet="Bob Johnson"; purpose="Contract Signing" } | ConvertTo-Json
-    $updated = Invoke-RestMethod -Uri "$baseUrl/visitors/$createdVisitorId" -Method PUT -Headers $authHeaders -Body $updateBody -ContentType "application/json"
-    Report-Test 17 "Update visitor record via PUT" ($updated.name -eq "Alice Smith Updated") "Updated name: $($updated.name)"
-} catch { Report-Test 17 "Update visitor record via PUT" $false $_.Exception.Message }
+    $statusBody = @{ status="Approved" } | ConvertTo-Json
+    $updated = Invoke-RestMethod -Uri "$baseUrl/visitors/$createdVisitorId/status" -Method PATCH -Headers $authHeaders -Body $statusBody -ContentType "application/json"
+    Report-Test 17 "Approve visitor status via PATCH /visitors/:id/status" ($updated.status -eq "Approved") "Status updated to: $($updated.status)"
+} catch { Report-Test 17 "Approve visitor status via PATCH /visitors/:id/status" $false $_.Exception.Message }
 
 # ---------------------------------------------------------
 # CATEGORY 5: Deletion & Data Integrity (TC18 - TC20)
@@ -151,10 +152,10 @@ Write-Host "`n--- CATEGORY 5: Deletion & Data Integrity ---" -ForegroundColor Da
 
 try {
     $fakeId = "507f1f77bcf86cd799439011"
-    $updateBody = @{ name="Fake User"; mobile="0000000000"; personToMeet="Nobody" } | ConvertTo-Json
-    $updated = Invoke-RestMethod -Uri "$baseUrl/visitors/$fakeId" -Method PUT -Headers $authHeaders -Body $updateBody -ContentType "application/json"
-    Report-Test 18 "Update non-existent visitor ID (expects 404)" $false "Updated non-existent ID"
-} catch { Report-Test 18 "Update non-existent visitor ID (expects 404)" $true "Returned 404 as expected" }
+    $updateBody = @{ status="Approved" } | ConvertTo-Json
+    $updated = Invoke-RestMethod -Uri "$baseUrl/visitors/$fakeId/status" -Method PATCH -Headers $authHeaders -Body $updateBody -ContentType "application/json"
+    Report-Test 18 "Update status on non-existent visitor ID (expects 404)" $false "Updated non-existent ID"
+} catch { Report-Test 18 "Update status on non-existent visitor ID (expects 404)" $true "Returned 404 as expected" }
 
 try {
     $deleted = Invoke-RestMethod -Uri "$baseUrl/visitors/$createdVisitorId" -Method DELETE -Headers $authHeaders
