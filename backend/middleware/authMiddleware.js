@@ -1,12 +1,15 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
+
+const getJwtSecret = () => process.env.JWT_SECRET || 'visitorApp_superSecret_2026';
 
 const protect = (req, res, next) => {
   const token = req.header('Authorization');
   if (!token) return res.status(401).json({ error: 'No token, authorization denied' });
 
   try {
-    const decoded = jwt.verify(token.split(' ')[1] || token, JWT_SECRET);
+    const secret = getJwtSecret();
+    const tokenString = token.startsWith('Bearer ') ? token.split(' ')[1] : token;
+    const decoded = jwt.verify(tokenString, secret);
     req.user = decoded;
     next();
   } catch (error) {

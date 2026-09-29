@@ -32,21 +32,23 @@ app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/visitor_db';
+const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'admin123';
 
 mongoose.connect(MONGO_URI)
   .then(async () => {
     const User = require('./models/User');
     const bcrypt = require('bcryptjs');
 
-    // Ensure default admin user exists with password admin123
+    // Ensure default admin user exists with password from env
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('admin123', salt);
+    const hashedPassword = await bcrypt.hash(ADMIN_PASS, salt);
     await User.findOneAndUpdate(
-      { username: 'admin' },
+      { username: ADMIN_USER },
       { password: hashedPassword, role: 'admin' },
       { upsert: true, new: true }
     );
-    console.log('Admin user verified: admin / admin123');
+    console.log(`Admin user verified: ${ADMIN_USER}`);
 
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
