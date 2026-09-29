@@ -38,7 +38,10 @@ function App() {
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <Routes>
             {/* Public Visitor Self Check-In Route */}
-            <Route path="/" element={<SelfCheckIn />} />
+            <Route path="/" element={<SelfCheckIn initialTab="register" />} />
+            
+            {/* Dedicated Public Visitor Status Lookup Route */}
+            <Route path="/status" element={<SelfCheckIn initialTab="status" />} />
 
             {/* Admin Login */}
             <Route path="/login" element={!token ? <Login setToken={setToken} setUser={setUser} /> : <Navigate to="/admin" />} />

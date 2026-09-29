@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { UserCheck, Clock, ArrowRight, CheckCircle2, XCircle, Search, RefreshCw } from 'lucide-react';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/visitors`;
 
-const SelfCheckIn = () => {
-  const [activeTab, setActiveTab] = useState('register'); // 'register' or 'status'
+const SelfCheckIn = ({ initialTab = 'register' }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
   
   // Registration state
   const [formData, setFormData] = useState({
@@ -197,7 +201,7 @@ const SelfCheckIn = () => {
           }`}
         >
           <Search size={18} />
-          <span>Check My Approval Status</span>
+          <span>Check Visit Status</span>
         </button>
       </div>
 
@@ -298,7 +302,7 @@ const SelfCheckIn = () => {
         </>
       )}
 
-      {/* TAB 2: CHECK MY STATUS */}
+      {/* TAB 2: CHECK VISIT STATUS */}
       {activeTab === 'status' && (
         <>
           <div className="flex items-center space-x-3 mb-6 pb-4 border-b">
