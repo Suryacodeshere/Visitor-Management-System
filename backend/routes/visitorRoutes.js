@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { addVisitor, getVisitors, getVisitorById, getTodayStats, updateVisitor, updateVisitorStatus, deleteVisitor } = require('../controllers/visitorController');
+const { addVisitor, checkVisitorStatus, getVisitors, getVisitorById, getTodayStats, updateVisitor, updateVisitorStatus, deleteVisitor } = require('../controllers/visitorController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-// Public route — visitors can list/register themselves
+// Public routes — visitors can register & check their status
 router.post('/', addVisitor);
+router.get('/check-status/:mobile', checkVisitorStatus);
 
 // Admin-only protected routes
 router.get('/', protect, authorize('admin'), getVisitors);

@@ -3,9 +3,27 @@ const Visitor = require('../models/Visitor');
 const addVisitor = async (req, res) => {
   try {
     const { name, mobile, companyName, personToMeet, purpose } = req.body;
+    
+    // Check if visitor registered today with this mobile number
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const existingVisitor = await Visitor.findOne({
+      mobile: mobile.trim(),
+      entryTime: { $gte: today }
+    }).sort({ entryTime: -1 });
+
+    if (existingVisitor) {
+      return res.status(200).json({
+        isExisting: true,
+        message: 'A visit request with this mobile number already exists for today.',
+        visitor: existingVisitor
+      });
+    }
+
     const newVisitor = new Visitor({ 
       name, 
-      mobile, 
+      mobile: mobile.trim(), 
       companyName, 
       personToMeet, 
       purpose,
@@ -15,6 +33,24 @@ const addVisitor = async (req, res) => {
     res.status(201).json(newVisitor);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+const checkVisitorStatus = async (req, res) => {
+  try {
+    const { mobile } = req.params;
+    if (!mobile || mobile.trim().length !== 10) {
+      return res.status(400).json({ error: 'Please provide a valid 10-digit mobile number' });
+    }
+
+    const visitor = await Visitor.findOne({ mobile: mobile.trim() }).sort({ entryTime: -1 });
+    if (!visitor) {
+      return res.status(404).json({ error: 'No visitor record found for this mobile number.' });
+    }
+
+    res.status(200).json(visitor);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -100,5 +136,5 @@ const deleteVisitor = async (req, res) => {
 };
 
 module.exports = {
-  addVisitor, getVisitors, getVisitorById, getTodayStats, updateVisitor, updateVisitorStatus, deleteVisitor
+  addVisitor, checkVisitorStatus, getVisitors, getVisitorById, getTodayStats, updateVisitor, updateVisitorStatus, deleteVisitor
 };
