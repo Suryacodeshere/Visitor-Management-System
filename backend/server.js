@@ -38,14 +38,15 @@ mongoose.connect(MONGO_URI)
     const User = require('./models/User');
     const bcrypt = require('bcryptjs');
 
-    // Seed default admin user if not existing
-    let adminUser = await User.findOne({ username: 'admin' });
-    if (!adminUser) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('admin123', salt);
-      await User.create({ username: 'admin', password: hashedPassword, role: 'admin' });.
-      
-    }
+    // Ensure default admin user exists with password admin123
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash('admin123', salt);
+    await User.findOneAndUpdate(
+      { username: 'admin' },
+      { password: hashedPassword, role: 'admin' },
+      { upsert: true, new: true }
+    );
+    console.log('Admin user verified: admin / admin123');
 
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })

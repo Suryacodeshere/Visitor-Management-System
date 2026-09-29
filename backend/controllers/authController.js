@@ -7,13 +7,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
 const register = async (req, res) => {
   try {
     const { username, password, role } = req.body;
+    const cleanUsername = username ? username.trim() : '';
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
     const newUser = new User({ 
-      username, 
+      username: cleanUsername, 
       password: hashedPassword,
-      role: role || 'receptionist'
+      role: role || 'admin'
     });
     await newUser.save();
     
@@ -26,7 +27,11 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Please provide both username and password' });
+    }
+    const cleanUsername = username.trim();
+    const user = await User.findOne({ username: { $regex: new RegExp(`^${cleanUsername}$`, 'i') } });
     if (!user) return res.status(400).json({ error: 'User not found' });
     
     const isMatch = await bcrypt.compare(password, user.password);
